@@ -6,14 +6,12 @@ on:
 name: Production CI/CD
   
 jobs:
-
   build:
     name: Build Image
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    needs: [check, fmt]
     steps:
     - name: Check out code
       uses: actions/checkout@v2
