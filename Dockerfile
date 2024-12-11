@@ -15,14 +15,6 @@ RUN cd ~/libre/LibreOffice_24.8.3.2_Linux_x86-64_rpm/RPMS/ && rpm -Uvh *.rpm && 
 
 ENV HOME=/tmp
 
-# Trigger dummy run to generate bootstrap files to improve cold start performance
-RUN touch /tmp/test.txt \
-  && cd /tmp \
-  && libreoffice --headless --invisible --nodefault --view \
-  --nolockcheck --nologo --norestore --convert-to pdf \
-  --outdir /tmp /tmp/test.txt \
-  && rm /tmp/test.*
-
 COPY ./index.js ${LAMBDA_TASK_ROOT}/
 
 CMD [ "handler.handler" ]
