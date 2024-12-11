@@ -4,7 +4,7 @@ ENV PATH=/var/lang/bin:/usr/local/bin:/usr/bin/:/bin:/opt/bin
 
 # Configure linker to correctly point to libraries
 ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib64"
-RUN dnf install -y xorg-x11-fonts-* libSM.x86_64 libXinerama-devel google-noto-sans-cjk-fonts binutils tar gzip xz \
+RUN dnf install -y xorg-x11-fonts-* libSM.x86_64 libXinerama-devel libxslt google-noto-sans-cjk-fonts binutils tar gzip xz \
   openssl nss-tools dbus-libs cups-libs && dnf clean all
 
 RUN cp /lib64/libssl.so.3 /lib64/libssl3.so
