@@ -38,8 +38,10 @@ async function convertDocxToPdf(buffer) {
 }
 
 export const handler = async (event, context) => {
+  const { fileContent, fileName } = event;
+
   try {
-    const decodedDocxContent = Buffer.from(event, "base64");
+    const decodedDocxContent = Buffer.from(fileContent, "base64");
     const pdfBuffer = await convertDocxToPdf(decodedDocxContent);
     const encodedPdfFileContent = pdfBuffer.toString("base64");
 
@@ -47,7 +49,7 @@ export const handler = async (event, context) => {
       statusCode: 200,
       headers: {
         "Content-Type": "application/octet-stream",
-        "Content-Disposition": `attachment; filename="output.pdf"`,
+        "Content-Disposition": `attachment; filename="${fileName.replace('.docx', '.pdf')}"`,
       },
       body: encodedPdfFileContent,
       isBase64Encoded: true,
