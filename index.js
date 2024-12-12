@@ -6,13 +6,13 @@ async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
   const tempDir = "/tmp";
   const userProfilePath = `/tmp/libreoffice-user-${uuid()}`;
-  const fontCacheDir = `/tmp/fontconfig-${uuid()}`;
 
   writeFileSync(fontCacheDir, '');
 
   const envVariables = {
     ...process.env,
-    FONTCONFIG_PATH: fontCacheDir,
+    FONTCONFIG_FILE: '/dev/null',
+    FONTCONFIG_PATH: '/tmp',
   };
 
   const inputFilePath = `${tempDir}/${tempFileName}.docx`;
