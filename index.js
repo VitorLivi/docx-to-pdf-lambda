@@ -1,42 +1,15 @@
-import { exec } from "child_process";
-import { writeFileSync, readFileSync, unlinkSync } from "fs";
+import { writeFileSync, readFileSync } from "fs";
 import { v4 as uuid } from "uuid";
+const { convertTo } = require('@shelf/aws-lambda-libreoffice');
 
 async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
   const tempDir = "/tmp";
-  const userProfilePath = `/tmp/libreoffice-user-${uuid()}`;
 
-  const inputFilePath = `${tempDir}/${tempFileName}.docx`;
-  const outputFilePath = `${tempDir}/${tempFileName}.pdf`;
+  writeFileSync(`${tempDir}/${tempFileName}.docx`, buffer);
+  convertTo(`${tempDir}/${tempFileName}.docx`, 'pdf');
 
-  writeFileSync(inputFilePath, buffer);
-
-  await new Promise((resolve, reject) => {
-    const command = `libreoffice --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error("LibreOffice Error:", error.message);
-        console.error("stderr:", stderr);
-
-        reject(new Error(error.message));
-        return;
-      }
-      if (stderr) {
-        console.warn("LibreOffice Warning:", stderr);
-      }
-
-      console.log("stdout:", stdout);
-      resolve(true);
-    });
-  }).catch((error) => {
-    throw new Error(`Error during conversion: ${error.message}`);
-  });
-
-  const pdfBuffer = readFileSync(outputFilePath);
-
-  unlinkSync(inputFilePath);
-  unlinkSync(outputFilePath);
+  const pdfBuffer = readFileSync(`${tempDir}/${tempFileName}.pdf`);
 
   return pdfBuffer;
 }
