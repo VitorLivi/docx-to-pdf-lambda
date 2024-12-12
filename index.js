@@ -2,11 +2,18 @@ import { exec } from "child_process";
 import { writeFileSync, readFileSync, unlinkSync } from "fs";
 import { v4 as uuid } from "uuid";
 
-const userProfilePath = "/tmp/libreoffice-user";
-
 async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
   const tempDir = "/tmp";
+  const userProfilePath = `/tmp/libreoffice-user-${uuid()}`;
+  const fontCacheDir = `/tmp/fontconfig-${uuid()}`;
+
+  writeFileSync(fontCacheDir, '');
+
+  const envVariables = {
+    ...process.env,
+    FONTCONFIG_PATH: fontCacheDir,
+  };
 
   const inputFilePath = `${tempDir}/${tempFileName}.docx`;
   const outputFilePath = `${tempDir}/${tempFileName}.pdf`;
@@ -15,7 +22,7 @@ async function convertDocxToPdf(buffer) {
 
   await new Promise((resolve, reject) => {
     const command = `libreoffice --headless --norestore --nofirststartwizard --invisible -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
-    exec(command, (error, stdout, stderr) => {
+    exec(command, { env: envVariables }, (error, stdout, stderr) => {
       if (error) {
         console.error("LibreOffice Error:", error.message);
         reject(new Error(error.message));
