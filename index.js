@@ -13,17 +13,20 @@ async function convertDocxToPdf(buffer) {
   writeFileSync(inputFilePath, buffer);
 
   await new Promise((resolve, reject) => {
-    const command = `libreoffice --headless --norestore --nofirststartwizard --invisible -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
+    const command = `libreoffice --headless --norestore --nofirststartwizard -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error("LibreOffice Error:", error.message);
+        console.error("stderr:", stderr);
+
         reject(new Error(error.message));
         return;
       }
       if (stderr) {
         console.warn("LibreOffice Warning:", stderr);
       }
-      console.log(stdout);
+
+      console.log("stdout:", stdout);
       resolve(true);
     });
   }).catch((error) => {
