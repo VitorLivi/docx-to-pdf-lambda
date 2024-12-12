@@ -1,6 +1,6 @@
 import { writeFileSync, readFileSync } from "fs";
 import { v4 as uuid } from "uuid";
-const { convertTo } = require('@shelf/aws-lambda-libreoffice');
+import { convertTo } from "@shelf/aws-lambda-libreoffice";
 
 async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
