@@ -7,12 +7,6 @@ async function convertDocxToPdf(buffer) {
   const tempDir = "/tmp";
   const userProfilePath = `/tmp/libreoffice-user-${uuid()}`;
 
-  const envVariables = {
-    ...process.env,
-    FONTCONFIG_FILE: '/dev/null',
-    FONTCONFIG_PATH: '/tmp',
-  };
-
   const inputFilePath = `${tempDir}/${tempFileName}.docx`;
   const outputFilePath = `${tempDir}/${tempFileName}.pdf`;
 
@@ -20,7 +14,7 @@ async function convertDocxToPdf(buffer) {
 
   await new Promise((resolve, reject) => {
     const command = `libreoffice --headless --norestore --nofirststartwizard --invisible -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
-    exec(command, { env: envVariables }, (error, stdout, stderr) => {
+    exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error("LibreOffice Error:", error.message);
         reject(new Error(error.message));
