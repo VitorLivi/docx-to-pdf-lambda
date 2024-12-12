@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "dependencies": {
     "uuid": "^11.0.3"
   }
