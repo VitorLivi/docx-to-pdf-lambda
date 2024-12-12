@@ -7,8 +7,6 @@ async function convertDocxToPdf(buffer) {
   const tempDir = "/tmp";
   const userProfilePath = `/tmp/libreoffice-user-${uuid()}`;
 
-  writeFileSync(fontCacheDir, '');
-
   const envVariables = {
     ...process.env,
     FONTCONFIG_FILE: '/dev/null',
