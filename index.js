@@ -11,6 +11,7 @@ async function convertDocxToPdf(buffer) {
   const outputFilePath = `${tempDir}/${tempFileName}.pdf`;
 
   writeFileSync(inputFilePath, buffer);
+  writeFileSync(`${userProfilePath}`, "");
 
   await new Promise((resolve, reject) => {
     const command = `libreoffice --headless -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
