@@ -13,7 +13,7 @@ async function convertDocxToPdf(buffer) {
   writeFileSync(inputFilePath, buffer);
 
   await new Promise((resolve, reject) => {
-    const command = `libreoffice --headless --norestore --nofirststartwizard -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
+    const command = `libreoffice --headless -env:UserInstallation=file://${userProfilePath} --convert-to pdf --outdir ${tempDir} ${inputFilePath}`;
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error("LibreOffice Error:", error.message);
