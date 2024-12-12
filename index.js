@@ -1,13 +1,21 @@
-import { writeFileSync, readFileSync } from "fs";
+import { writeFileSync, readFileSync, readdirSync } from "fs";
 import { v4 as uuid } from "uuid";
 import { convertTo } from "@shelf/aws-lambda-libreoffice";
+
 
 async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
   const tempDir = "/tmp";
 
   writeFileSync(`${tempDir}/${tempFileName}.docx`, buffer);
+
+  console.log("Files in /tmp:");
+  console.log(readdirSync("/tmp"));
+
   convertTo(`${tempFileName}.docx`, 'pdf');
+
+  console.log("Files in /tmp after conversion:");
+  console.log(readdirSync("/tmp"));
 
   const pdfBuffer = readFileSync(`${tempDir}/${tempFileName}.pdf`);
 
