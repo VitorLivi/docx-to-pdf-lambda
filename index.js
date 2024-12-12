@@ -1,30 +1,32 @@
 import { writeFileSync, readFileSync, readdirSync } from "fs";
 import { v4 as uuid } from "uuid";
-import { unpack, defaultArgs } from "@shelf/aws-lambda-libreoffice";
+import { execSync } from "child_process";
 
 async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
   const tempDir = "/tmp";
 
-  writeFileSync(`${tempDir}/${tempFileName}.docx`, buffer);
+  const inputFilePath = `${tempDir}/${tempFileName}.docx`;
+  const outputFilePath = `${tempDir}/${tempFileName}.pdf`;
 
-  console.log("Files in /tmp:");
-  console.log(readdirSync("/tmp"));
+  writeFileSync(inputFilePath, buffer);
 
-  await convertTo(`${tempFileName}.docx`, 'pdf');
+  console.log(readdirSync(tempDir))
 
-  await unpack();
+  try {
+    const res = execSync(`libreoffice --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir ${tempDir} ${inputFilePath}`);
+    console.log("NO ERROR")
+    console.log(res.toString())
 
-  execSync(
-    `libreoffice ${defaultArgs.join(
-      ' '
-    )} --convert-to pdf /temp/${tempFileName}.docx --outdir /tmp`
-  );
+  }
+  catch (err) {
+    console.log("output", err)
+    console.log("sdterr", err.stderr.toString())
+  }
 
-  console.log("Files in /tmp after conversion:");
-  console.log(readdirSync("/tmp"));
+  console.log(readdirSync(tempDir))
 
-  const pdfBuffer = readFileSync(`${tempDir}/${tempFileName}.pdf`);
+  const pdfBuffer = readFileSync(outputFilePath);
 
   return pdfBuffer;
 }
@@ -55,3 +57,4 @@ export const handler = async (event, context) => {
     };
   }
 };
+
