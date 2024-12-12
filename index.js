@@ -7,7 +7,7 @@ async function convertDocxToPdf(buffer) {
   const tempDir = "/tmp";
 
   writeFileSync(`${tempDir}/${tempFileName}.docx`, buffer);
-  convertTo(`${tempDir}/${tempFileName}.docx`, 'pdf');
+  convertTo(`${tempFileName}.docx`, 'pdf');
 
   const pdfBuffer = readFileSync(`${tempDir}/${tempFileName}.pdf`);
 
