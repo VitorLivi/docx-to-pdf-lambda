@@ -16,6 +16,8 @@ This is a simple lambda function that converts a docx file to a pdf file using l
 1. Clone this repository
 2. Create a new ECR repository in your AWS account
 3. Create a new lambda function in your AWS account
+4. Go to your lambda function and add HOME=/tmp enviroment variable in the configuration tab
+5. Ensure that the lambda have storage enough to work with the files
 2. Configure your AWS credentials and other secrets in github secrets
 3. Push the code to your repository
 
