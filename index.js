@@ -4,7 +4,6 @@ import { v4 as uuid } from "uuid";
 
 async function cleanTempFiles(tempDir, tempFileName) {
   execSync(`rm -rf ${tempDir}/${tempFileName}.*`);
-  execSync(`rm -rf ${tempDir}/libreoffice-user-*`);
 }
 
 async function convertDocxToPdf(buffer) {
