@@ -1,6 +1,11 @@
-import { writeFileSync, readFileSync, readdirSync } from "fs";
-import { v4 as uuid } from "uuid";
 import { execSync } from "child_process";
+import { readFileSync, writeFileSync } from "fs";
+import { v4 as uuid } from "uuid";
+
+async function cleanTempFiles(tempDir, tempFileName) {
+  execSync(`rm -rf ${tempDir}/${tempFileName}.*`);
+  execSync(`rm -rf ${tempDir}/libreoffice-user-*`);
+}
 
 async function convertDocxToPdf(buffer) {
   const tempFileName = uuid();
@@ -11,33 +16,68 @@ async function convertDocxToPdf(buffer) {
 
   writeFileSync(inputFilePath, buffer);
 
-  console.log(readdirSync(tempDir))
-
   try {
-    const res = execSync(`libreoffice --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir ${tempDir} ${inputFilePath}`);
-    console.log("NO ERROR")
+    const res = execSync(`cd /tmp && libreoffice --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf:writer_pdf_Export --outdir ${tempDir} ${inputFilePath}`);
     console.log(res.toString())
+  } catch (err) {
+    // Exec libreoffice twice because in the first time that it executes, it creates the profile and restarts the service, so, we need to do it manually.
+    if (err.status === 81) {
+      try {
+        const res = execSync(`cd /tmp && libreoffice --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf:writer_pdf_Export --outdir ${tempDir} ${inputFilePath}`);
+        console.log(res.toString())
 
+      } catch (err) {
+        console.log("output", err)
+        console.log(JSON.stringify(err))
+      }
+    } else {
+      console.log("output", err)
+      console.log(JSON.stringify(err))
+    }
   }
-  catch (err) {
-    console.log("output", err)
-    console.log("sdterr", err.stderr.toString())
-  }
-
-  console.log(readdirSync(tempDir))
 
   const pdfBuffer = readFileSync(outputFilePath);
 
+  cleanTempFiles(tempDir, tempFileName);
+
   return pdfBuffer;
+}
+
+function validate(fileContent, fileName) {
+  if (!fileContent) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing file content" }),
+    };
+  } else if (!fileName) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing file name" }),
+    };
+  } else if (!fileName.endsWith(".docx")) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid file format. Only .docx files are supported" }),
+    }
+  }
+
+  return null
 }
 
 export const handler = async (event, context) => {
   const { fileContent, fileName } = event;
 
+  console.log("Received file:", fileName);
+  console.log("Type of file content:", typeof fileContent);
+
+  const validationError = validate(fileContent, fileName);
+
+  if (validationError) {
+    return validationError;
+  }
+
   try {
-    const decodedDocxContent = Buffer.from(fileContent, "base64");
-    const pdfBuffer = await convertDocxToPdf(decodedDocxContent);
-    const encodedPdfFileContent = pdfBuffer.toString("base64");
+    const pdfBuffer = await convertDocxToPdf(Buffer.from(fileContent));
 
     return {
       statusCode: 200,
@@ -45,16 +85,14 @@ export const handler = async (event, context) => {
         "Content-Type": "application/octet-stream",
         "Content-Disposition": `attachment; filename="${fileName.replace('.docx', '.pdf')}"`,
       },
-      body: encodedPdfFileContent,
-      isBase64Encoded: true,
+      body: pdfBuffer
     };
   } catch (error) {
-    console.error("Error processing file:", error);
+    console.error(error);
 
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "File processing failed." }),
+      body: JSON.stringify({ error: error.message }),
     };
   }
 };
-
